@@ -1,6 +1,6 @@
 ## Routes implemented
 
-'/'---> product list view '/products'---> product list view, '/product'---> product view, '/cart'---> cart view
+'/products'---> product list view, '/product'---> product view, '/cart'---> cart view
 
 ## Available Scripts
 
