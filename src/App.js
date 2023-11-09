@@ -3,19 +3,19 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
-import ProductList from './layout/pages/productList/productList.page';
-import ProductDesc from './layout/pages/productDescription/productDescription.page';
-import Cart from './layout/pages/cart/cart.page';
+import Loader from './layout/components/loader/loader.component';
+import Home from './layout/pages/home/home.page';
+const LazyProductList = React.lazy(()=>import('./layout/pages/productList/productList.page'));
+const LazyProductDesc = React.lazy(()=>import('./layout/pages/productDescription/productDescription.page'));
+const LazyCart = React.lazy(()=>import('./layout/pages/cart/cart.page'));
 
 const App =()=>{
     return (
       <Routes>
-        <Route>
-          <Route index path="/" element={<ProductList/>} />
-          <Route index path="/products" element={<ProductList/>} />
-          <Route exact path="/product/:id" element={<ProductDesc/>} />
-          <Route exact path="/cart" element={<Cart/>} />
-        </Route>
+          <Route index path="/" element={<Home/>} />
+          <Route index path="/products" element={<React.Suspense fallback={<Loader/>}><LazyProductList/></React.Suspense>} />
+          <Route exact path="/product/:id" element={<React.Suspense fallback={<Loader/>}><LazyProductDesc/></React.Suspense>} />
+          <Route exact path="/cart" element={<React.Suspense fallback={<Loader/>}><LazyCart/></React.Suspense>} />
       </Routes>
     );
 }
