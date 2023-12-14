@@ -9,7 +9,11 @@ import circular from "../../../assets/json/circular-loading.json";
 import Loader from "../../components/loader/loader.component";
 import { categoriesData, productData } from "../../../utilities/productData";
 import { filteredList } from "../../../utilities";
-import Modal from "react-modal";
+import { Breadcrumbs, Typography, Grid, Button, Dialog, AppBar, IconButton, Toolbar } from "@mui/material";
+import { Link } from "react-router-dom";
+import { Box } from "@mui/system";
+import CloseIcon from "@mui/icons-material/Close";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 
 const pageVariants = {
 	initial: {
@@ -44,6 +48,8 @@ class ProductList extends React.Component {
 			loading: true,
 			min: 0,
 			max: 0,
+			minLimit: 0,
+			maxLimit: 0,
 			showFilter: false,
 			productLoading: false,
 			colors: [],
@@ -88,6 +94,7 @@ class ProductList extends React.Component {
 				colors: colors,
 				min: min,
 				max: max,
+				maxLimit: max,
 				categories: categoriesData,
 				loading: false,
 			},
@@ -114,11 +121,12 @@ class ProductList extends React.Component {
 			filterProductList: this.state.productList,
 			outStock: true,
 			type: [],
-			min: 100,
-			max: 5000,
+			min: 0,
+			max: this.state.maxLimit,
 			presentColor: "All",
 			category: "All",
 			subcategory: "All",
+			sortType: "Relevance",
 		});
 	};
 
@@ -135,7 +143,16 @@ class ProductList extends React.Component {
 	};
 
 	handleFilterIt = () => {
-		var newList = filteredList(this.state.productList, { color: this.state.presentColor, min: this.state.min, max: this.state.max, sort: this.state.sortType, category: this.state.category?.name || this.state.category, subCategory: this.state.subcategory?.name || this.state.subcategory, stock: this.state.outStock, emboss: this.state.emboss });
+		var newList = filteredList(this.state.productList, {
+			color: this.state.presentColor,
+			min: this.state.min,
+			max: this.state.max,
+			sort: this.state.sortType,
+			category: this.state.category,
+			subCategory: this.state.subcategory,
+			stock: this.state.outStock,
+			emboss: this.state.emboss,
+		});
 		this.setState({
 			filterProductList: newList,
 		});
@@ -159,27 +176,17 @@ class ProductList extends React.Component {
 					<Loader />
 				) : (
 					<motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition} className="productlist-container">
-						<div className="categorylist-breadcrumb">
-							<div className="breadcrumb-menu">
-								<div className="bd-menu-list">
-									<a href="/" style={{ cursor: "pointer" }}>
-										Home
-									</a>
-									<a href="/">
-										<i className="fas fa-chevron-right"></i>
-									</a>
-									<a href={"/products"} style={{ cursor: "pointer" }}>
-										Products
-									</a>
-								</div>
-
-								<div className="bd-menu-stats">
-									<p>We have total {this.state.filterProductList.length > 1 ? this.state.filterProductList.length + " products" : this.state.filterProductList.length + " product"}</p>
-								</div>
-							</div>
-						</div>
-						<div className="catalogue">
-							<div className="filter">
+						<Box bgcolor="background.lightGrey" width="100%" px={{ xs: 2, sm: 6 }} py={2} display="flex" justifyContent="space-between" alignItems="center">
+							<Breadcrumbs separator="›" aria-label="product-list-breadcrumb">
+								<Link to="/">
+									<Typography color="text.grey">Home</Typography>
+								</Link>
+								<Typography color="text.primary">Products</Typography>
+							</Breadcrumbs>
+							<Typography variant="small">We have {(this.state?.filterProductList || []).length} product(s)</Typography>
+						</Box>
+						<Box sx={{ width: "100%", maxWidth: "1700px", display: "flex" }}>
+							<Box display={{ xs: "none", md: "block" }} sx={{ px: 3 }} width={300}>
 								<Filter
 									categories={this.state.categories}
 									colors={this.state.colors}
@@ -200,58 +207,52 @@ class ProductList extends React.Component {
 									handleRentRange={(min, max) => this.handleRentRange(min, max)}
 									handleProductOutStock={(value) => this.handleFilter("outStock", !this.state.outStock)}
 								/>
-							</div>
-
-							<div className="card-list-container">
+							</Box>
+							<Box width={{ xs: "100%", md: "calc(100% - 300px)" }} py={1}>
 								{this.state.productLoading ? (
-									<div
-										style={{
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-											width: "100%",
-											height: "100%",
-										}}>
+									<Box width="100%" height="90vh" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
 										<Lottie loop play animationData={circular} style={{ width: 100, height: 100 }} />
-									</div>
+									</Box>
 								) : (
-									<div className="card-list">
-										{this.state.filterProductList.length > 0 ? (
-											<>
-												{this.state.filterProductList.map((item, index) => {
-													return <Card item={item} addToWishlist={(e) => this.addToWishlist(e)} removeFromWishlist={(e) => this.removeFromWishlist(e)} key={index} />;
-												})}
-											</>
-										) : (
-											<div
-												style={{
-													width: "100%",
-													height: "85vh",
-													display: "flex",
-													alignItems: "center",
-													justifyContent: "center",
-													flexDirection: "column",
-												}}>
-												<Lottie loop play animationData={empty} style={{ width: 200, height: 200 }} />
-												<p
-													style={{
-														fontSize: "16px",
-														fontWeight: "bold",
-														color: "#313131",
-													}}>
-													Sorry! we could not find any items
-												</p>
-											</div>
-										)}
-									</div>
+									<Grid container>
+										{(this.state?.filterProductList || []).map((item, index) => {
+											return (
+												<Grid item key={index} xs={6} sm={4} md={4} lg={3} xl={2}>
+													<Card item={item} addToWishlist={(e) => this.addToWishlist(e)} removeFromWishlist={(e) => this.removeFromWishlist(e)} />
+												</Grid>
+											);
+										})}
+									</Grid>
 								)}
-							</div>
-						</div>
-						<div className="filter-mob-button-container">
-							<button onClick={() => this.setState({ showFilter: true })}>filter</button>
-						</div>
-						<Modal isOpen={this.state.showFilter} onRequestClose={() => this.setState({ showFilter: false })} contentLabel="Filter Modal">
-							<div className="mobile-filter-container">
+								{!(this.state?.filterProductList || []).length && (
+									<Box width="100%" height="70vh" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+										<Lottie loop play animationData={empty} style={{ width: 200, height: 200 }} />
+										<Typography variant="bold">Sorry! we could not find any items</Typography>
+									</Box>
+								)}
+							</Box>
+						</Box>
+						<Button
+							endIcon={<FilterAltIcon />}
+							size="large"
+							variant="contained"
+							sx={{ display: { sm: "block", md: "none" }, bgcolor: "#000", position: "sticky", bottom: 30, borderRadius: 8, color: "#fff" }}
+							onClick={() => this.setState({ showFilter: true })}>
+							Filters
+						</Button>
+						<Dialog fullScreen open={this.state.showFilter} onClose={() => this.setState({ showFilter: false })}>
+							<AppBar sx={{ position: "relative" }}>
+								<Toolbar>
+									<IconButton edge="start" color="inherit" onClick={() => this.setState({ showFilter: false })} aria-label="close">
+										<CloseIcon />
+									</IconButton>
+									<Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div"></Typography>
+									<Button autoFocus color="inherit" onClick={() => this.setState({ showFilter: false })}>
+										Done
+									</Button>
+								</Toolbar>
+							</AppBar>
+							<Box px={2}>
 								<Filter
 									categories={this.state.categories}
 									colors={this.state.colors}
@@ -272,8 +273,8 @@ class ProductList extends React.Component {
 									handleRentRange={(min, max) => this.handleRentRange(min, max)}
 									handleProductOutStock={(value) => this.handleFilter("outStock", !this.state.outStock)}
 								/>
-							</div>
-						</Modal>
+							</Box>
+						</Dialog>
 					</motion.div>
 				)}
 			</>

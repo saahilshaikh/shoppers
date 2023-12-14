@@ -20,7 +20,7 @@
 }
 
 .productlist-container .categorylist-breadcrumb .breadcrumb-menu {
-	width: 85%;
+	width: 100%;
 	max-width: 1700px;
 	height: 100%;
 	display: flex;
@@ -28,58 +28,20 @@
 	justify-content: space-between;
 }
 
-.productlist-container .categorylist-breadcrumb .breadcrumb-menu .bd-menu-list {
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-}
-
-.productlist-container .categorylist-breadcrumb .breadcrumb-menu .bd-menu-list a {
-	font-size: 14px;
-	margin-right: 14px;
-	text-decoration: none;
-	color: #414141;
-	text-transform: capitalize;
-}
-
-.productlist-container .categorylist-breadcrumb .breadcrumb-menu .bd-menu-list a i {
-	font-size: 10px;
-}
-
-.productlist-container .categorylist-breadcrumb .breadcrumb-menu .bd-menu-stats {
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: flex-end;
-}
-
-.productlist-container .categorylist-breadcrumb .breadcrumb-menu .bd-menu-stats p {
-	font-size: 14px;
-	color: #414141;
-}
-
 .productlist-container .catalogue {
-	width: 85%;
+	width: 100%;
 	max-width: 1700px;
 	display: flex;
+	flex-direction: row;
 	justify-content: space-between;
 }
 
 .productlist-container .catalogue .card-list-container {
-	width: 75%;
-}
-
-.productlist-container .catalogue .card-list {
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	padding: 0;
+	width: calc(100% - 320px);
 }
 
 .productlist-container .catalogue .filter {
-	width: 285px;
+	width: 300px;
 }
 
 .filter-mob-button-container {

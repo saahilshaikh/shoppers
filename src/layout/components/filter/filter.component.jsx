@@ -1,8 +1,10 @@
 import React from "react";
 import "./filter.style.css";
-import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 import filter from "./assets/filter.png";
+import { Box } from "@mui/system";
+import { Button, Typography, Checkbox, Slider, Container } from "@mui/material";
+import FilterAltIcon from "@mui/icons-material/FilterAlt";
 export default class Filter extends React.Component {
 	constructor() {
 		super();
@@ -51,135 +53,139 @@ export default class Filter extends React.Component {
 			);
 		}
 	};
+
+	handleReset = () => {
+		this.setState(
+			{
+				minPrice: this.state.minLimit,
+				maxPrice: this.state.maxLimit,
+			},
+			() => {
+				this.props.handleReset();
+			},
+		);
+	};
+
 	render() {
-		const price = {
-			[this.state.minLimit]: (
-				<div className="sliderLabel">
-					<div className="indicator"></div>
-					<p>{this.state.minLimit}</p>
-				</div>
-			),
-			[this.state.maxLimit]: (
-				<div className="sliderLabel">
-					<div className="indicator"></div>
-					<p>{this.state.maxLimit}</p>
-				</div>
-			),
-		};
+		let categoryOptions = [{ name: "All", value: "All" }];
+		let subCategoryOptions = [{ name: "All", value: "All" }];
+		let colorOptions = [{ name: "All", value: "All" }];
+		(this.props?.categories || []).map((category) => {
+			categoryOptions.push({ name: category.name, value: category.name });
+			if (category.name === this.props.category) {
+				category.subcategories.map((subCategory) => {
+					subCategoryOptions.push({ name: subCategory.name, value: subCategory.name });
+				});
+			}
+		});
+		(this.props?.colors || []).map((color) => {
+			colorOptions.push({ name: color, value: color });
+		});
+
+		let information = [
+			{
+				type: "checkbox",
+				title: "Sort by",
+				options: [
+					{ name: "Relevance", value: "Relevance" },
+					{ name: "Price- Low to High", value: "lth" },
+					{ name: "Price- High to Low", value: "htl" },
+				],
+				variableName: "sortType",
+				function: (value) => this.props.handleSort(value),
+			},
+			{
+				type: "checkbox",
+				title: "Categories",
+				options: categoryOptions,
+				variableName: "category",
+				function: (value) => this.props.handleCategory(value),
+			},
+			{
+				type: "checkbox",
+				title: "Sub Categories",
+				options: subCategoryOptions,
+				variableName: "subcategory",
+				function: (value) => this.props.handleSubCategory(value),
+			},
+			{
+				type: "range",
+				title: "Price",
+				variableNames: ["min", "max"],
+				function: (value) => this.handleRange(value),
+			},
+			{
+				type: "checkbox",
+				title: "Colors",
+				options: colorOptions,
+				variableName: "presentColor",
+				function: (value) => this.props.handleColorFilter(value),
+			},
+			{
+				type: "checkbox",
+				title: "Availability",
+				options: [{ name: "Out of Stock", value: "true" }],
+				variableName: "outStock",
+				function: (value) => this.props.handleProductOutStock(value),
+			},
+		];
+
 		return (
-			<div className="filter-container">
-				<div className="filter-header">
-					<div className="left">
-						<div className="filter">
-							<img src={filter} alt="filter-logo" />
-							<p>Filters</p>
-						</div>
-						<div className="filter-inPhone" onClick={this.handleShowFilter}>
-							<img src={filter} alt="filter-logo" />
-							<p>Filter</p>
-						</div>
-					</div>
-
-					{/* Tags */}
-					<div className="right">
-						<div className="reset">
-							<button onClick={this.props.handleReset}>Reset</button>
-						</div>
-					</div>
-				</div>
-
-				<div className="avail">
-					<h1>SORT BY</h1>
-					<div onClick={() => this.props.handleSort("Relevance")} className="category">
-						{this.props.sortType === "Relevance" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>RELEVANCE</p>
-					</div>
-					<div onClick={() => this.props.handleSort("lth")} className="category">
-						{this.props.sortType === "lth" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>PRICE-LOW TO HIGH</p>
-					</div>
-					<div onClick={() => this.props.handleSort("htl")} className="category">
-						{this.props.sortType === "htl" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>PRICE-HIGH TO LOW</p>
-					</div>
-				</div>
-				<div className="avail">
-					<h1>CATEGORIES</h1>
-					<div onClick={() => this.props.handleCategory("All")} className="category">
-						{this.props.category === "All" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>All</p>
-					</div>
-					{(this.props?.categories || []).map((category, index) => {
+			<Box width="100%" py={2}>
+				<Box width="100%" display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+					<Typography variant="small" fontSize={16} sx={{ ml: 0.4 }}>
+						Filters
+					</Typography>
+					<Button onClick={this.handleReset} variant="text" size="small" color="primary">
+						Clear all
+					</Button>
+				</Box>
+				{information.map((information, index) => {
+					if (information.title == "Sub Categories" && this.props.category === "All") {
+						return null;
+					} else {
 						return (
-							<div onClick={() => this.props.handleCategory(category)} className="category" key={index}>
-								{this.props?.category?.name && category.name.toLowerCase() === this.props.category.name.toLowerCase() ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-								<p>{category.name}</p>
-							</div>
+							<Box width="100%" padding={2} my={1} key={index} sx={{ border: "1px solid #e7e7e7", borderRadius: 1 }}>
+								<Typography color="#000" variant="small">
+									{(information?.title || "").toUpperCase()}
+								</Typography>
+								{information.type === "checkbox" &&
+									(information?.options || []).map((option, optionIndex) => {
+										let value = this.props[information.variableName] || "";
+										return (
+											<Box width="100%" display="flex" alignItems="center" key={optionIndex}>
+												<Checkbox
+													onClick={() => information.function(option?.value || "")}
+													color="primary"
+													size="small"
+													checked={value.toString().toLowerCase() === (option?.value || "").toString().toLowerCase()}
+													sx={{ py: 0.5 }}
+												/>
+												<Typography color="#000" variant="small" sx={{ textTransform: "capitalize" }}>
+													{option?.name || ""}
+												</Typography>
+											</Box>
+										);
+									})}
+								{information.type === "range" && (
+									<Box width="100%" p={1}>
+										<Typography color="#000" variant="small">
+											&#8377;{this.state.minPrice} - &#8377;{this.state.maxPrice}
+										</Typography>
+										<Slider
+											value={[this.props[information.variableNames[0]], this.props[information.variableNames[1]]]}
+											onChange={(e, value) => this.handleRange(value)}
+											min={this.state.minLimit}
+											max={this.state.maxLimit}
+											valueLabelDisplay="auto"
+										/>
+									</Box>
+								)}
+							</Box>
 						);
-					})}
-				</div>
-
-				{this.props.category?.name && this.props.category?.subcategories ? (
-					<div className="cat">
-						<h1>SUB-CATEGORIES</h1>
-						<div onClick={() => this.props.handleSubCategory("All")} className="category">
-							{this.props.subcategory === "All" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-							<p>All</p>
-						</div>
-						{this.props.category.name &&
-							(this.props?.category?.subcategories || []).map((sub, index) => {
-								return (
-									<div onClick={() => this.props.handleSubCategory(sub)} className="category" key={index}>
-										{this.props.subcategory.name && sub.name.toLowerCase() === this.props.subcategory.name.toLowerCase() ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-										<p>{sub.name}</p>
-									</div>
-								);
-							})}
-					</div>
-				) : null}
-
-				<div className="price">
-					<h1>PRICE RANGE</h1>
-					<p>
-						&#8377;{this.state.minPrice} - &#8377;{this.state.maxPrice}
-					</p>
-					<div className="slider">
-						<Slider range marks={price} allowCross={false} value={[this.props.min, this.props.max]} step={50} min={this.state.minLimit} max={this.state.maxLimit} onChange={(e) => this.handleRange(e)} />
-					</div>
-				</div>
-
-				{(this.props?.colors || []).length > 0 ? (
-					<div className="colors">
-						<h1>Colors</h1>
-						<div onClick={() => this.props.handleColorFilter("All")} className="colorCheck">
-							{this.props.presentColor === "All" ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-							<p>All</p>
-						</div>
-						{(this.props?.colors || []).map((color, index) => {
-							return (
-								<div key={index} onClick={() => this.props.handleColorFilter(color)}>
-									<div className="colorCheck">
-										{color.toLowerCase() === this.props.presentColor.toLowerCase() ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-										<p style={{ textTransform: "capitalize" }}>{color}</p>
-									</div>
-								</div>
-							);
-						})}
-					</div>
-				) : null}
-
-				<div className="avail">
-					<h1>AVAILABILITY</h1>
-					<div className="category" onClick={this.props.handleProductEmboss}>
-						{this.props.emboss ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>Emboss</p>
-					</div>
-					<div className="category" onClick={this.props.handleProductOutStock}>
-						{this.props.outStock ? <i className="fas fa-check-square"></i> : <div className="uncheck"></div>}
-						<p>Out of Stock</p>
-					</div>
-				</div>
-			</div>
+					}
+				})}
+			</Box>
 		);
 	}
 }

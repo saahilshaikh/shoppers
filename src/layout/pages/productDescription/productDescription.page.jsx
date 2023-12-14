@@ -14,6 +14,8 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import { productData } from "../../../utilities/productData";
 import Swal from "sweetalert2";
+import { Breadcrumbs, Typography, Grid, Button, Dialog, AppBar, IconButton, Toolbar } from "@mui/material";
+import { Box } from "@mui/system";
 
 const pageVariants = {
 	initial: {
@@ -468,29 +470,51 @@ export default class ProductDesc extends React.Component {
 					<Loader />
 				) : (
 					<motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition} className="product-desc-container">
-						<div className="categorylist-breadcrumb">
-							<div className="breadcrumb-menu">
-								<div className="bd-menu-list">
-									<a href="/" style={{ cursor: "pointer" }}>
-										Home
-									</a>
-									<a href="/">
-										<i className="fas fa-chevron-right"></i>
-									</a>
-									<a href={"/products"} style={{ cursor: "pointer" }}>
-										Product
-									</a>
-									<a href="/products">
-										<i className="fas fa-chevron-right"></i>
-									</a>
-									<a href={"/product/" + this.state.product.id} style={{ cursor: "pointer" }}>
-										{this.state.product.title}
-									</a>
-								</div>
-							</div>
-						</div>
+						<Helmet>
+							<meta charSet="utf-8" />
+							<title>{this.state.product.title}</title>
+							<link rel="canonical" href={"/product/" + this.state.product.id} />
+						</Helmet>
+						<Box bgcolor="background.lightGrey" width="100%" px={{ xs: 2, sm: 6 }} py={2} display="flex" justifyContent="space-between" alignItems="center">
+							<Breadcrumbs separator="›" aria-label="product-list-breadcrumb">
+								<Link to="/">
+									<Typography color="text.grey">Home</Typography>
+								</Link>
+								<Link to="/products">
+									<Typography color="text.grey">Products</Typography>
+								</Link>
+								<Typography color="text.primary">{this.state.product.title}</Typography>
+							</Breadcrumbs>
+						</Box>
+						<Grid container width="100%">
+							<Grid item bgcolor="red" xs={12} md={6} height={200}>
+								{this.state.product.images &&
+									this.state.product.images.map((item, index) => (
+										<div key={index}>
+											{this.state.activeImage === index ? (
+												<div className="preview-image activeImage" key={index}>
+													<img src={this.state.product.images[index]} alt="slider Images" />
+												</div>
+											) : (
+												<div className="preview-image" key={index}>
+													<img
+														src={item}
+														alt="slider Images"
+														onClick={() => {
+															this.setState({
+																activeImage: index,
+															});
+														}}
+													/>
+												</div>
+											)}
+										</div>
+									))}
+							</Grid>
+							<Grid item bgcolor="yellow" xs={12} md={6} height={200}></Grid>
+						</Grid>
 
-						<div className="product-container">
+						{/* <div className="product-container">
 							{this.state.product.title ? (
 								<div className="product-desc">
 									<Helmet>
@@ -761,7 +785,13 @@ export default class ProductDesc extends React.Component {
 													</>
 												) : (
 													<div className="emboss-field">
-														<input placeholder="Please enter your emboss text" maxLength={10} name="embossText" onChange={this.handleChange} value={this.state.embossText} />
+														<input
+															placeholder="Please enter your emboss text"
+															maxLength={10}
+															name="embossText"
+															onChange={this.handleChange}
+															value={this.state.embossText}
+														/>
 														<div className="emboss-buttons">
 															<button
 																onClick={() => {
@@ -882,8 +912,8 @@ export default class ProductDesc extends React.Component {
 									</p>
 								</div>
 							)}
-						</div>
-						{this.state.simProducts.length > 0 ? (
+						</div> */}
+						{/* {this.state.simProducts.length > 0 ? (
 							<>
 								<div className="product-like">
 									<Slider data={this.state.simProducts} title={"Similar Products"} view={false} />
@@ -896,8 +926,8 @@ export default class ProductDesc extends React.Component {
 									<Slider data={this.state.simProducts2} title={"You may also like"} view={false} />
 								</div>
 							</>
-						) : null}
-						<div className="buying-options-sticky">
+						) : null} */}
+						{/* <div className="buying-options-sticky">
 							{this.state.product.quantity > 0 ? (
 								<>
 									<div className="option" onClick={this.AddToCart}>
@@ -912,7 +942,7 @@ export default class ProductDesc extends React.Component {
 							) : (
 								<p className="outstock">OUT OF STOCK</p>
 							)}
-						</div>
+						</div> */}
 					</motion.div>
 				)}
 			</>
